@@ -4,4 +4,4 @@ This package contains simple, yet sensible templates you can adopt for your View
    
 A ViewModel protocol (with async and sync variants) is defined which should be adopted by your view model implementations to introduce consistency in your project, and a generic definition of ViewState is available to prevent duplication in your code. 
 
-See `Example.swift` for usage examples.
+See [`Example.swift`](https://github.com/abdullah-original/MVVMKit/blob/master/Sources/Example.swift) for usage examples.
