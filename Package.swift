@@ -4,7 +4,7 @@ import PackageDescription
 
 let package = Package(
     name: "MVVMKit",
-    platforms: [.iOS(.v13), .macOS(.v10_15), .macCatalyst(.v13), .tvOS(.v13), .watchOS(.v6)],
+    platforms: [.iOS(.v14), .macOS(.v11), .macCatalyst(.v14), .tvOS(.v14), .watchOS(.v7)],
     products: [
         .library(
             name: "MVVMKit",
@@ -14,7 +14,8 @@ let package = Package(
     targets: [
         .target(
             name: "MVVMKit",
-            path: "Sources"
+            path: "Sources",
+            swiftSettings: [.define("DEBUG", .when(configuration: .debug))]
         )
     ],
     swiftLanguageModes: [.v6]

@@ -1,15 +1,19 @@
+#if DEBUG
 import SwiftUI
 
 // MARK: - Example
-protocol ExampleViewModelProtocol: ViewModel<String, Error, ExampleAction> { }
 
-final class ExampleViewModel: ExampleViewModelProtocol {
-    @Published var state: ViewState<String, Error>
+typealias ExampleViewState = ViewState<String, ErrorUI>
+protocol ExampleVM: ViewModel<ExampleViewState, ExampleAction> { }
+
+final class ExampleViewModel: ExampleVM {
+
+    @Published var state: ExampleViewState
     
-    init(state: ViewState<String, Error> = .initial) {
+    init(state: ExampleViewState = .initial) {
         self.state = state
     }
-    
+
     func execute(_ action: ExampleAction) async {
         switch action {
         case .viewDidAppear:
@@ -18,12 +22,12 @@ final class ExampleViewModel: ExampleViewModelProtocol {
     }
 }
 
-enum ExampleAction: Sendable {
+enum ExampleAction: Sendable, Equatable {
     case viewDidAppear
 }
 
-@available(iOS 14, macOS 11, tvOS 14, watchOS 7.0, macCatalyst 14, *)
-struct ExampleView<VM: ExampleViewModelProtocol>: View {
+struct ExampleView<VM: ExampleVM>: View {
+    
     @ObservedObject private var viewModel: VM
     
     init(viewModel: VM = ExampleViewModel()) {
@@ -31,39 +35,44 @@ struct ExampleView<VM: ExampleViewModelProtocol>: View {
     }
     
     var body: some View {
-        StatefulView(state: viewModel.state) { data in
-            Text(data)
-        } errorView: { error in
-            Text(error.localizedDescription)
+        StatefulView(
+            state: viewModel.state,
+            content: Text.init,
+            errorView: ErrorView.init
+        )
+        .onAppear {
+            Task {
+                await viewModel.execute(.viewDidAppear)
+            }
         }
     }
 }
 
-@available(iOS 15, macOS 12, tvOS 15, watchOS 8, macCatalyst 15, *)
-#Preview("Initial"){
+@available(iOS 17.0, macOS 14.0, tvOS 17.0, watchOS 10.0, macCatalyst 17.0, *)
+#Preview {
     ExampleView()
-}
-
-@available(iOS 15, macOS 12, tvOS 15, watchOS 8, macCatalyst 15, *)
-#Preview("Loading") {
+    
+    Spacer()
+    
     ExampleView(viewModel: ExampleViewModel(state: .loading))
-}
-
-@available(iOS 15, macOS 12, tvOS 15, watchOS 8, macCatalyst 15, *)
-#Preview("Data Loaded") {
+    
+    Spacer()
+    
     ExampleView(viewModel: ExampleViewModel(state: .dataLoaded("Hello World!")))
-}
-
-@available(iOS 15, macOS 12, tvOS 15, watchOS 8, macCatalyst 15, *)
-#Preview("Error") {
+    
+    Spacer()
+    
     ExampleView(
         viewModel: ExampleViewModel(
             state: .error(
-                NSError(
-                    domain: "something went wrong",
-                    code: -9
+                ErrorUI(
+                    title: "something went wrong",
+                    subtitle: "please try again",
+                    image: "exclamationmark.triangle"
                 )
             )
         )
     )
+    .fixedSize()
 }
+#endif
