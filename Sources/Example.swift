@@ -4,7 +4,7 @@ import SwiftUI
 // MARK: - Example
 
 typealias ExampleViewState = ViewState<String, ErrorUI>
-protocol ExampleVM: ViewModel<ExampleViewState, ExampleAction> { }
+protocol ExampleVM: AsyncViewModel<ExampleViewState, Void> { }
 
 final class ExampleViewModel: ExampleVM {
 
@@ -14,16 +14,7 @@ final class ExampleViewModel: ExampleVM {
         self.state = state
     }
 
-    func execute(_ action: ExampleAction) async {
-        switch action {
-        case .viewDidAppear:
-            state = .dataLoaded("Hello World!")
-        }
-    }
-}
-
-enum ExampleAction: Sendable, Equatable {
-    case viewDidAppear
+    func execute(_ action: Void) async { }
 }
 
 struct ExampleView<VM: ExampleVM>: View {
@@ -40,39 +31,42 @@ struct ExampleView<VM: ExampleVM>: View {
             content: Text.init,
             errorView: ErrorView.init
         )
-        .onAppear {
-            Task {
-                await viewModel.execute(.viewDidAppear)
-            }
-        }
     }
 }
 
 @available(iOS 17.0, macOS 14.0, tvOS 17.0, watchOS 10.0, macCatalyst 17.0, *)
 #Preview {
-    ExampleView()
     
-    Spacer()
+    @Previewable @ObservedObject var viewModelInitial = ExampleViewModel()
     
-    ExampleView(viewModel: ExampleViewModel(state: .loading))
+    @Previewable @ObservedObject var viewModelLoading = ExampleViewModel(state: .loading)
     
-    Spacer()
+    @Previewable @ObservedObject var viewModelLoaded = ExampleViewModel(state:  .dataLoaded("Hello World!"))
     
-    ExampleView(viewModel: ExampleViewModel(state: .dataLoaded("Hello World!")))
-    
-    Spacer()
-    
-    ExampleView(
-        viewModel: ExampleViewModel(
-            state: .error(
-                ErrorUI(
-                    title: "something went wrong",
-                    subtitle: "please try again",
-                    image: "exclamationmark.triangle"
-                )
+    @Previewable @ObservedObject var viewModelError = ExampleViewModel(
+        state: .error(
+            ErrorUI(
+                title: "something went wrong",
+                subtitle: "please try again",
+                image: "exclamationmark.triangle"
             )
         )
     )
-    .fixedSize()
+    LazyVStack {
+        
+        ExampleView(viewModel: viewModelInitial)
+        
+        Spacer()
+        
+        ExampleView(viewModel: viewModelLoading)
+        
+        Spacer()
+        
+        ExampleView(viewModel: viewModelLoaded)
+        
+        Spacer()
+        
+        ExampleView(viewModel: viewModelError)
+    }
 }
 #endif
