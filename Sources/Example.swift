@@ -1,14 +1,16 @@
 #if DEBUG
 import SwiftUI
+import Observation
 
 // MARK: - Example
 
 typealias ExampleViewState = ViewState<String, ErrorUI>
 protocol ExampleVM: AsyncViewModel<ExampleViewState, Void> { }
 
+@Observable
 final class ExampleViewModel: ExampleVM {
 
-    @Published var state: ExampleViewState
+    var state: ExampleViewState
     
     init(state: ExampleViewState = .initial) {
         self.state = state
@@ -19,7 +21,7 @@ final class ExampleViewModel: ExampleVM {
 
 struct ExampleView<VM: ExampleVM>: View {
     
-    @ObservedObject private var viewModel: VM
+    @State private var viewModel: VM
     
     init(viewModel: VM = ExampleViewModel()) {
         self.viewModel = viewModel
@@ -37,13 +39,13 @@ struct ExampleView<VM: ExampleVM>: View {
 @available(iOS 17.0, macOS 14.0, tvOS 17.0, watchOS 10.0, macCatalyst 17.0, *)
 #Preview {
     
-    @Previewable @ObservedObject var viewModelInitial = ExampleViewModel()
+    @Previewable var viewModelInitial = ExampleViewModel()
     
-    @Previewable @ObservedObject var viewModelLoading = ExampleViewModel(state: .loading)
+    @Previewable var viewModelLoading = ExampleViewModel(state: .loading)
     
-    @Previewable @ObservedObject var viewModelLoaded = ExampleViewModel(state:  .dataLoaded("Hello World!"))
+    @Previewable var viewModelLoaded = ExampleViewModel(state:  .dataLoaded("Hello World!"))
     
-    @Previewable @ObservedObject var viewModelError = ExampleViewModel(
+    @Previewable var viewModelError = ExampleViewModel(
         state: .error(
             ErrorUI(
                 title: "something went wrong",
