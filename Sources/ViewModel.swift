@@ -5,7 +5,8 @@ import Foundation
 public protocol ExtendableViewModel<State>: ObservableObject {
     associatedtype State: Sendable
     
-    var state: State { get }
+    // Set only allowed to enable bindings. In general, however, it is not recommended to modify the state from outside the ViewModel.
+    var state: State { get set }
 }
 
 @MainActor
